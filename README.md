@@ -23,7 +23,7 @@
 
 部分运行截图  
 登录  
-![](https://raw.githubusercontent.com/kylingit/QQSpider/master/QQSpider_v2/screenshot/snipaste08262333.png =100x100)
+![](https://raw.githubusercontent.com/kylingit/QQSpider/master/QQSpider_v2/screenshot/snipaste08262333.png)
 
 爬取说说  
 ![](https://raw.githubusercontent.com/kylingit/QQSpider/master/QQSpider_v2/screenshot/snipaste08262330.png)
