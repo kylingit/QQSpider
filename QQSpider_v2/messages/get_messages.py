@@ -34,7 +34,7 @@ class Get_messages(object):
                     + '&num=10&format=jsonp&inCharset=utf-8&outCharset=utf-8&g_tk=' + g_tk
 
                 r = s.get(url, headers=header)
-                dict = self.data2json(r.content[10:-2])
+                dict = self.data2json(r.content[10:-2].decode('utf-8'))
                 if start < dict['data']['total'] - 1:                # get 10 items at a time
                     print(str(start) + '-' + str(start + 10) + ':')
                     start = start + 10
@@ -156,7 +156,7 @@ class Get_messages(object):
                     self.replyId += 1
 
     def data2json(self, data):
-        json_obj = json.loads(data.decode('utf-8'))
+        json_obj = json.loads(data)
         return json_obj
 
     def write2file(self, filename, data):

@@ -1,14 +1,20 @@
 # -*- coding:utf-8 -*-
 import os
+import sys
 import time
 from qq import qq
-from selenium import webdriver
 from util import util
+import urllib.request
+from selenium import webdriver
+import subprocess
 
 # 浏览器驱动程序路径
-path = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
-filename = '\login\phantomjs.exe'
-driver_file = path + filename
+if util.detect_os() == 'windows':
+    path = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
+    filename = 'login\phantomjs.exe'
+    driver_file = path + os.sep + filename
+elif util.detect_os() == 'linux':
+    driver_file = 'phantomjs'
 
 
 class Login(object):
@@ -21,7 +27,7 @@ class Login(object):
 
     def login(self):
         """使用 selenium 模拟登录"""
-        # driver = webdriver.Chrome(driver_file)
+        # driver = webdriver.Chrome('chromedriver_path')
         driver = webdriver.PhantomJS(driver_file)         # 驱动的路径
 
         driver.get('http://i.qq.com/')
@@ -36,10 +42,36 @@ class Login(object):
         driver.execute_script("document.getElementById('login_button').parentNode.hidefocus=false;")
         driver.find_element_by_xpath('//*[@id="loginform"]/div[4]/a').click()
         driver.find_element_by_id('login_button').click()
+        time.sleep(2)
 
-        time.sleep(3)
+        if driver.current_url != ('https://user.qzone.qq.com/' + self.qq.user):
+            print('trying get captcha...')
+            driver.switch_to_frame(driver.find_element_by_tag_name("iframe"))
+            captcha_src = driver.execute_script("return document.getElementsByTagName('img')['capImg'].src")
+            urllib.request.urlretrieve(captcha_src, "captcha.jpg")
+            print('captcha saved in ./captcha.jpg')
+
+            if util.detect_os() == 'windows':
+                os.startfile("captcha.jpg")
+            elif util.detect_os() == 'linux':
+                subprocess.call(["xdg-open", "captcha.jpg"])
+
+            captcha = input("please input captcha: ")
+            driver.find_element_by_id('capAns').clear()
+            driver.find_element_by_id('capAns').send_keys(captcha)
+
+            driver.find_element_by_id('submit').click()
+
+            time.sleep(2)
+            if driver.current_url != ('https://user.qzone.qq.com/' + self.qq.user):
+                print('incorrect verification code, please try again.')
+
         driver.get('https://user.qzone.qq.com/' + self.qq.user)
         self.cookies = driver.get_cookies()             # 获取 cookie
+
+        if len(self.cookies) < 10:
+            print('username or password was wrong, please try again.')
+            sys.exit(0)
 
     def check_login(self, qq, cookie):
         """

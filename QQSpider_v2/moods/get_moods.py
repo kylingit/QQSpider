@@ -40,9 +40,8 @@ class Get_moods(object):
                         target_qq + '&pos=' + str(self.moodstatus['moodPos']) + '&num=10&format=jsonp&g_tk=' + g_tk
                     # print(url)
                     r = s.get(url, headers=header)
-                    r.content.strip().decode().replace('\n', '')
 
-                    dict = self.data2json(r.content[10:-2])
+                    dict = self.data2json(r.content[10:-2].decode('utf-8').strip().replace('\n', ''))
                     if self.moodstatus['moodPos'] < dict['usrinfo']['msgnum'] - 1:                # get 10 items at a time
                         self.moodstatus['moodPos'] += 10
                         print('current qq: %s, current pos: %s' % (target_qq, str(self.moodstatus['moodPos'])))
@@ -66,8 +65,7 @@ class Get_moods(object):
                         # print(url)
                         r = s.get(url, headers=header)
 
-                        r.content.strip().decode().replace('\n', '').replace('\\', '')
-                        data = self.data2json(r.content[10:-2])
+                        data = self.data2json(r.content[10:-2].decode('utf-8').strip().replace('\n', '').replace('\\', ''))
                         time.sleep(random.random())
 
                         self.moodstatus['moodTid'] = item['tid']                               # 更新状态
@@ -79,10 +77,10 @@ class Get_moods(object):
 
             except Exception as e:                  # save status
                 print('have a error!!!')
-                print(repr(e), e)
-                # log = codecs.open('log.txt', 'a', 'utf-8')
-                # log.write('\nerror: ' + target_qq + ':' + repr(e) + e.decode() + '\n')
-            else:
+                print(e)
+                log = codecs.open('log.txt', 'a', 'utf-8')
+                log.write('\nerror: ' + target_qq + ':' + repr(e) + e.decode() + '\n')
+
                 self.moodstatus['is_last_mood'] = 1
                 self.mood_status.update_mood_status(db, 'mood_status', target_qq, self.moodstatus)
 
@@ -114,7 +112,8 @@ class Get_moods(object):
         r = s.get(url, headers=header)
 
         if r.status_code != 403:
-            dict = self.data2json(r.content[10:-3].strip().replace('\n', '').replace('\\', '').replace('"data":{', '"data":[{').replace('}}', '}]}'))
+            dict = self.data2json(r.content[10:-3].decode('utf-8').strip().replace('\n', '')
+                                  .replace('\\', '').replace('"data":{', '"data":[{').replace('}}', '}]}'))
             if dict['data'] != '':
                 for item in dict['data']:
                     if item['total_number'] != 0:
@@ -296,5 +295,5 @@ class Get_moods(object):
         self.moodstatus['moodlikeId'] += 1
 
     def data2json(self, data):
-        json_obj = json.loads(data.decode('utf-8'))
+        json_obj = json.loads(data)
         return json_obj

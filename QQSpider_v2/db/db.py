@@ -1,5 +1,5 @@
 # -*- coding:utf-8 -*-
-
+import sys
 import pymysql
 import warnings
 
@@ -14,11 +14,12 @@ class DB(object):
 
     def __init__(self):
         try:
-            self.conn = pymysql.connect("127.0.0.1", "root", "TooR", charset="utf8")
+            self.conn = pymysql.connect("127.0.0.1", "root", "root", charset="utf8")
             self.cursor = self.conn.cursor()
-            print('databases connected.')
+            print('database connected.')
         except:
-            print('databases username or password wrong, exit.')
+            print('database username or password was wrong, exit.')
+            sys.exit(0)
 
     def Create_db(self, dbname):
         cursor = self.cursor
@@ -63,4 +64,8 @@ class DB(object):
         cursor.execute('DROP DATABASE IF EXISTS %s' % dbname)
 
     def __del__(self):
-        self.conn.close()
+        try:
+            if self.conn is not None:
+                self.conn.close()
+        except Exception as e:
+            pass

@@ -1,5 +1,6 @@
 # -*- coding:utf-8 -*-
 import os
+import sys
 import codecs
 from login import login
 from util import util
@@ -11,7 +12,7 @@ from db import db
 from status import status
 
 # 修改账号密码
-qq_num = '12345678'
+qq_num = 'username'
 qq_pwd = 'password'
 
 
@@ -48,18 +49,21 @@ def get_moods_info(target_qq):
 if __name__ == '__main__':
     lg = login.Login(qq_num, qq_pwd)
     db = db.DB()
-
+    # print(lg.login_test())
     # 从文件读取好友
     if not os.path.isfile('friends.txt'):
         if lg.login_test():
             print('getting all friends...')
             db.Create_db('db' + qq_num)
             get_friends_info()
-
-    status = status.Status()
-    friendsqq = codecs.open('friends.txt', 'r', 'utf-8')
+        else:
+            print('login error, exit.')
+            sys.exit(0)
 
     if lg.login_test():
+        status = status.Status()
+        friendsqq = codecs.open('friends.txt', 'r', 'utf-8')
+
         for target_qq in friendsqq:
             target_qq = target_qq.strip('\n').strip('\r')
             dict = []
@@ -72,10 +76,11 @@ if __name__ == '__main__':
 
                 # 爬取说说或留言或日志
                 try:
-                    # get_moods_info(target_qq)
-                    get_messages_info(target_qq)
+                    get_moods_info(target_qq)
+                    # get_messages_info(target_qq)
                 except Exception as e:
                     print('error: ' + str(e))
                     break
     else:
         print('login error, exit.')
+        sys.exit(0)

@@ -3,14 +3,22 @@ import os
 import requests
 import pickle
 import random
-
+from platform import system
 """
 一些基本模块，与 cookie 操作和浏览器头相关
 """
 
 path = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
-filename = '\cookies.txt'
-cookie_file = path + filename
+filename = 'cookies.txt'
+cookie_file = path + os.sep + filename
+
+
+def detect_os():
+    os = system().lower()
+    if 'linux' in os:
+        return "linux"
+    elif 'windows' in os:
+        return "windows"
 
 
 def save_cookie_to_file(cookie, cookie_file):
@@ -53,6 +61,7 @@ def get_cookie():
 
 
 cookie = cookiejar_to_string(get_cookie())
+# print(cookie)
 
 UAlist = [
     "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.1 (KHTML, like Gecko) Chrome/22.0.1207.1 Safari/537.1",

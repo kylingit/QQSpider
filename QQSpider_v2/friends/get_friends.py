@@ -1,5 +1,6 @@
 # -*- coding:utf-8 -*-
 import json
+import re
 from util import util
 
 
@@ -22,9 +23,8 @@ class Get_friends(object):
             qq.user + '&fupdate=1&outCharset=utf-8&g_tk=' + g_tk
         header = self.header
         r = s.get(url, headers=header)
-        r.content.strip().decode().replace('\r\n', '').replace('\\', '')
 
-        dict = self.data2json(r.content[10:-2])
+        dict = self.data2json(r.content[10:-2].decode('utf-8').strip().replace('\r\n', '').replace('\\', ''))
         id = 0
         for friends in dict['data']['items']:
             friendsdetail = self.get_friends_detail(qq, cookie, friends['uin'])
@@ -62,11 +62,15 @@ class Get_friends(object):
                     'online': friends['online'],
                     'v6': friends['v6']
                 }
-            print('insert id %s: ' % id + data['remark'])
+
+            if data['remark'] == '':
+                print('insert id %s: ' % id + data['nickname'])
+            else:
+                print('insert id %s: ' % id + data['remark'])
 
             self.operate_db_friends(db, 'qq_friends', data)
             id += 1
-            self.write2file('friends.txt', str(friends['uin']))
+            self.write2file('friends.txt', str(friends['uin']) + '\n')
         print('\ntotal friends: %s\ndone.' % id)
 
     def get_friends_detail(self, qq, cookie, qq_num):
@@ -80,9 +84,7 @@ class Get_friends(object):
         header = self.header
         r = s.get(url, headers=header)
         # r.content = r.content.replace('"Ⅰ', '')                # 有些非主流的文字坑死人=_=#
-        r.content.strip().decode().replace('\'', '').replace('\r\n', '').replace('\\', '')
-
-        dict = self.data2json(r.content[10:-2])
+        dict = self.data2json(r.content[10:-2].decode('utf-8').strip().replace('\'', '').replace('\r\n', '').replace('\\', ''))
         if dict['code'] == 0:
             return dict['data']
         else:
@@ -132,9 +134,9 @@ class Get_friends(object):
 
     def data2json(self, data):
         """网页内容转换为 json 格式数据"""
-        json_obj = json.loads(data.decode('utf-8'))
+        json_obj = json.loads(data)
         return json_obj
 
     def write2file(self, filename, data):
-        with open(filename, 'w') as f:
+        with open(filename, 'a') as f:
             f.write(data)
