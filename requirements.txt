@@ -1,0 +1,2 @@
+selenium
+PyMySQL==0.7.11
