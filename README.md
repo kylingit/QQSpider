@@ -14,7 +14,7 @@ Windows 平台:
 环境要求:
 - Python 3
 - PhantomJS 2.1.1
-- `pip install -r requests.txt`
+- `pip install -r requirements.txt`
 
 运行方式:
 - 修改`main.py`的账号密码
